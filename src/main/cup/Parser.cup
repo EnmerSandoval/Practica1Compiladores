@@ -1,0 +1,78 @@
+package org.example.Parser;
+
+import java_cup.runtime.*;
+
+
+class Parser;
+
+parser code{:
+
+
+:};
+
+terminal SELECCIONAR, FILTRAR, INSERTAR, ACTUALIZAR, ASIGNAR, ELIMINAR, EN, VALORES, AND, OR, PALABRA,
+         ASTERISCO, MENORIGUALQUE, MAYORIGUALQUE, DIFERENTE, IGUAL, MENORQUE, MAYORQUE, COMA,
+         PUNTOYCOMA, DOSPUNTOS, NUMERO, PUNTO, PARENTESISA, PARENTESISC, COMILLAS;
+
+non terminal inicio, sentencia, selec, columnas, seleccion, inser, actua, actualizar, elim,  path, condiciones,
+            insercion, condicion, condicionNumeros, condicionPalabras;
+
+            precedence left OR;
+            precedence left AND;
+            precedence left IGUAL, DIFERENTE, MENORIGUALQUE, MAYORIGUALQUE, MENORQUE, MAYORQUE;
+
+
+
+start with inicio;
+
+inicio::= inicio sentencia
+   | sentencia;
+
+sentencia::=  selec {:System.out.println("Se realizo el Select");:}
+            | inser {:System.out.println("Se realizo el insert");:}
+            | actua {:System.out.println("Se realizo la actualizacion");:}
+            | elim  {:System.out.println("Se realizo el eliminar");:};
+
+selec::= SELECCIONAR:selec columnas:colums EN path:path FILTRAR condiciones:condi PUNTOYCOMA
+        | SELECCIONAR:selec columnas:colums EN path:path PUNTOYCOMA;
+
+inser::= INSERTAR:inser EN path insercion VALORES:val insercion PUNTOYCOMA:pyc;
+
+elim::= ELIMINAR EN path:path condiciones PUNTOYCOMA;
+
+actua::= ACTUALIZAR EN path:path ASIGNAR actualizar condiciones PUNTOYCOMA;
+
+columnas::= seleccion
+        | ASTERISCO;
+
+path::= PALABRA PUNTO PALABRA;
+
+insercion::= PARENTESISA seleccion PARENTESISC;
+
+seleccion::= seleccion COMA PALABRA
+        | PALABRA;
+
+condiciones::= condiciones AND condicion
+            | condiciones OR condicion
+            | condicion;
+
+condicion::= condicionNumeros
+         | condicionPalabras;
+
+actualizar::= actualizar COMA condicion
+        | condicion;
+
+condicionNumeros::= PALABRA IGUAL NUMERO;
+
+condicionPalabras::= PALABRA IGUAL COMILLAS PALABRA COMILLAS
+                 | PALABRA IGUAL COMILLAS NUMERO COMILLAS;
+
+condicionalNumeros::= condicionNumeros
+                    | PALABRA MAYORIGUALQUE:operador NUMERO {:RESULT= operador;:}
+                    | PALABRA MENORIGUALQUE:operador NUMERO {:RESULT= operador;:}
+                    | PALABRA MAYORQUE:operador NUMERO {:RESULT= operador;:}
+                    | PALABRA MENORQUE:operador NUMERO {:RESULT= operador;:}
+                    | PALABRA DIFERENTE:operador NUMERO {:RESULT= operador;:};
+
+diferencia::= PALABRA DIFERENTE COMILLAS PALABRA COMILLAS
+            | PALABRA DIFERENTE COMILLAS NUMERO COMILLAS;

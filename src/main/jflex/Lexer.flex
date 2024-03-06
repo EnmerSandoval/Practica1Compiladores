@@ -18,7 +18,7 @@ decimal = ({digit} | ({digit} \. {digit}))+
 letter = [a-zA-Z]
 guion = \_ | \-
 LineTerminator = \r|\n|\r\n
-espacioEnBlanco = [ \t\f] | {LineTerminator} ]
+espacioEnBlanco = [ \t\f]+ | {LineTerminator}
 Palabra = {letter}({letter} | {digit})+
 PalabraGuion = {Palabra}({guion}{Palabra})? | {Palabra}
 comillas = "\""
@@ -55,8 +55,8 @@ comillas = "\""
 "VALORES"               {return symbol(ParserSym.VALORES,  yytext());}
 "AND"                   {return symbol(ParserSym.AND,  yytext());}
 "OR"                    {return symbol(ParserSym.OR,  yytext());}
-{PalabraGuion}          {return symbol(ParserSym.PALABRA,  yytext());}
 {decimal}               {return symbol(ParserSym.NUMERO,  yytext());}
+{PalabraGuion}          {return symbol(ParserSym.PALABRA,  yytext());}
 "*"                     {return symbol(ParserSym.ASTERISCO,  yytext());}
 "<="                    {return symbol(ParserSym.MENORIGUALQUE,  yytext());}
 ">="                    {return symbol(ParserSym.MAYORIGUALQUE,  yytext());}
@@ -71,7 +71,6 @@ comillas = "\""
 "("                     {return symbol(ParserSym.PARENTESISA,  yytext());}
 ")"                     {return symbol(ParserSym.PARENTESISC,  yytext());}
 {comillas}              {return symbol(ParserSym.COMILLAS,  yytext());}
+{espacioEnBlanco}+ {}
 
-{espacioEnBlanco} {}
-
-.   {System.err.println("Hubo un error padrino");}
+.   {System.err.println("Hubo un error ");}

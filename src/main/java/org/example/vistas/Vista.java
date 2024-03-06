@@ -38,7 +38,7 @@ public class Vista extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         ide = new javax.swing.JTextArea();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea2 = new javax.swing.JTextArea();
+        consola = new javax.swing.JTextArea();
         jButton1 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -56,9 +56,9 @@ public class Vista extends javax.swing.JFrame {
         ide.setRows(5);
         jScrollPane2.setViewportView(ide);
 
-        jTextArea2.setColumns(20);
-        jTextArea2.setRows(5);
-        jScrollPane3.setViewportView(jTextArea2);
+        consola.setColumns(20);
+        consola.setRows(5);
+        jScrollPane3.setViewportView(consola);
 
         jButton1.setText("Analizar");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -129,10 +129,10 @@ public class Vista extends javax.swing.JFrame {
         // TODO add your handling code here:
         try {
             StringReader sr = new StringReader(ide.getText());
-            Lexer lex = new Lexer(new StringReader(ide.getText()));
+            Lexer lex = new Lexer(new StringReader(consola.getText()));
             Parser sintax = new Parser(lex);
             System.out.println(sintax.parse());
-            System.out.println(ide.getText());
+            System.out.println(consola.getText());
         } catch (Exception e) {
             System.out.println("----> " + e.getMessage());
             e.printStackTrace();
@@ -176,6 +176,7 @@ public class Vista extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTree arbol;
+    private javax.swing.JTextArea consola;
     private javax.swing.JTextArea ide;
     private javax.swing.JButton jButton1;
     private javax.swing.JMenu jMenu1;
@@ -186,6 +187,5 @@ public class Vista extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTextArea jTextArea2;
     // End of variables declaration//GEN-END:variables
 }

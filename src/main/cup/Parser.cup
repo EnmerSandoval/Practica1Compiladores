@@ -6,8 +6,23 @@ import java_cup.runtime.*;
 class Parser;
 
 parser code{:
+            /**
+             * Método al que se llama automáticamente ante algún error sintactico.
+             **/
+            public void syntax_error(Symbol s){
+                System.out.println("Error Sintáctico en la Línea " + (s.left) +
+                " Columna "+s.right+ ". No se esperaba este componente: " +s.value+".");
+            }
 
-
+            /**
+             * Método al que se llama automáticamente ante algún error sintáctico
+             * en el que ya no es posible una recuperación de errores.
+             **/
+            public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{
+                System.out.println("Error síntactico irrecuperable en la Línea " +
+                (s.left)+ " Columna "+s.right+". Componente " + s.value +
+                " no reconocido.");
+            }
 :};
 
 terminal SELECCIONAR, FILTRAR, INSERTAR, ACTUALIZAR, ASIGNAR, ELIMINAR, EN, VALORES, AND, OR, PALABRA,
@@ -15,13 +30,11 @@ terminal SELECCIONAR, FILTRAR, INSERTAR, ACTUALIZAR, ASIGNAR, ELIMINAR, EN, VALO
          PUNTOYCOMA, DOSPUNTOS, NUMERO, PUNTO, PARENTESISA, PARENTESISC, COMILLAS;
 
 non terminal inicio, sentencia, selec, columnas, seleccion, inser, actua, actualizar, elim,  path, condiciones,
-            insercion, condicion, condicionNumeros, condicionPalabras;
+            insercion, condicion, condicionPalabras, asignacion, condicionalNumeros;
 
             precedence left OR;
             precedence left AND;
             precedence left IGUAL, DIFERENTE, MENORIGUALQUE, MAYORIGUALQUE, MENORQUE, MAYORQUE;
-
-
 
 start with inicio;
 
@@ -34,7 +47,7 @@ sentencia::=  selec {:System.out.println("Se realizo el Select");:}
             | elim  {:System.out.println("Se realizo el eliminar");:};
 
 selec::= SELECCIONAR:selec columnas:colums EN path:path FILTRAR condiciones:condi PUNTOYCOMA
-        | SELECCIONAR:selec columnas:colums EN path:path PUNTOYCOMA;
+        |SELECCIONAR:selec columnas:colums EN path:path PUNTOYCOMA;
 
 inser::= INSERTAR:inser EN path insercion VALORES:val insercion PUNTOYCOMA:pyc;
 
@@ -56,18 +69,18 @@ condiciones::= condiciones AND condicion
             | condiciones OR condicion
             | condicion;
 
-condicion::= condicionNumeros
+condicion::= condicionalNumeros
          | condicionPalabras;
 
 actualizar::= actualizar COMA condicion
         | condicion;
 
-condicionNumeros::= PALABRA IGUAL NUMERO;
+asignacion::= PALABRA IGUAL:operador NUMERO {:RESULT= operador;:};
 
 condicionPalabras::= PALABRA IGUAL COMILLAS PALABRA COMILLAS
                  | PALABRA IGUAL COMILLAS NUMERO COMILLAS;
 
-condicionalNumeros::= condicionNumeros
+condicionalNumeros::= asignacion
                     | PALABRA MAYORIGUALQUE:operador NUMERO {:RESULT= operador;:}
                     | PALABRA MENORIGUALQUE:operador NUMERO {:RESULT= operador;:}
                     | PALABRA MAYORQUE:operador NUMERO {:RESULT= operador;:}

@@ -22,6 +22,11 @@
                 <Property name="text" type="java.lang.String" value="Crear Proyecto"/>
               </Properties>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem3">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Guardar"/>
+              </Properties>
+            </MenuItem>
           </SubComponents>
         </Menu>
       </SubComponents>
@@ -122,6 +127,7 @@
                 <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="arbolMouseClicked"/>
               </Events>
               <AuxValues>
+                <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="arbol.addMouseListener(new MouseAdapter() {&#xa;&#xa;            @Override&#xa;            public void mouseClicked(MouseEvent e) {&#xa;                TreePath path = arbol.getPathForLocation(e.getX(), e.getY());&#xa;                if (path != null) {&#xa;                    DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();&#xa;File selectedFile = new File(&quot;C:\\Users\\laptop&quot;+getSelectedFilePath(selectedNode));                    &#xa;                    if (SwingUtilities.isRightMouseButton(e)) {&#xa;                        if (!selectedFile.isFile()) {&#xa;                            showCreateFileMenu(selectedFile);&#xa;                        }&#xa;                    }&#xa;                }&#xa;            }&#xa;});"/>
                 <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="Vista_arbol"/>
               </AuxValues>
             </Component>

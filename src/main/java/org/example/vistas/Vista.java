@@ -4,7 +4,21 @@
  */
 package org.example.vistas;
 
+import java.awt.BorderLayout;
+import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import javax.swing.JFileChooser;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import org.example.Lexer.Lexer;
 import org.example.Parser.Parser;
 
@@ -14,6 +28,9 @@ import org.example.Parser.Parser;
  */
 public class Vista extends javax.swing.JFrame {
 
+    private DefaultMutableTreeNode rootNode;
+    private DefaultTreeModel treeModel;
+
     /**
      * Creates new form Vista
      */
@@ -21,6 +38,9 @@ public class Vista extends javax.swing.JFrame {
         this.setTitle("IDE");
         initComponents();
         this.setLocationRelativeTo(null);
+        rootNode = new DefaultMutableTreeNode("Proyecto");
+        treeModel = new DefaultTreeModel(rootNode);
+        arbol.setModel(treeModel);
     }
 
     /**
@@ -50,10 +70,20 @@ public class Vista extends javax.swing.JFrame {
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         arbol.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         arbol.setSelectionModel(null);
+        arbol.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                arbolMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(arbol);
 
         ide.setColumns(20);
         ide.setRows(5);
+        ide.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ideMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(ide);
 
         consola.setColumns(20);
@@ -102,6 +132,11 @@ public class Vista extends javax.swing.JFrame {
         jMenu1.setText("File");
 
         jMenuItem1.setText("Abrir Proyecto");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
         jMenu1.add(jMenuItem1);
 
         jMenuItem2.setText("Crear Proyecto");
@@ -127,17 +162,101 @@ public class Vista extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        try {
-            StringReader sr = new StringReader(ide.getText());
-            Lexer lex = new Lexer(new StringReader(consola.getText()));
-            Parser sintax = new Parser(lex);
-            System.out.println(sintax.parse());
-            System.out.println(consola.getText());
-        } catch (Exception e) {
-            System.out.println("----> " + e.getMessage());
-            e.printStackTrace();
+        System.out.println("Menú item 1 clickeado"); // Agrega un punto de control aquí
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            treeModel.setRoot(new DefaultMutableTreeNode("Proyecto")); // Limpiamos el árbol antes de comenzar
+            File folder = fileChooser.getSelectedFile();
+            System.out.println("Directorio seleccionado: " + folder.getAbsolutePath()); // Agrega un punto de control aquí
+            buildTree(rootNode, folder);
+            System.out.println("Árbol construido"); // Agrega un punto de control aquí
+            treeModel.reload();
+            System.out.println("Árbol recargado"); // Agrega un punto de control aquí
         }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File folder = fileChooser.getSelectedFile();
+            buildTree(rootNode, folder);
+            treeModel.reload();
+        }
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void arbolMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_arbolMouseClicked
+        // TODO add your handling code here:
+//    createTreeSelectionListener()l
+    }//GEN-LAST:event_arbolMouseClicked
+
+    private void ideMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ideMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ideMouseClicked
+
+    private void buildTree(DefaultMutableTreeNode parentNode, File parentFile) {
+        File[] files = parentFile.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(file.getName());
+                parentNode.add(node);
+                if (file.isDirectory()) {
+                    buildTree(node, file); 
+                }
+            }
+        }
+    }
+    
+    private TreeSelectionListener createTreeSelectionListener() {
+        return new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) arbol.getLastSelectedPathComponent();
+                if (selectedNode != null && selectedNode.isLeaf()) {
+                    // Obtener la ruta del archivo seleccionado
+                    TreePath path = e.getPath();
+                    StringBuilder filePathBuilder = new StringBuilder();
+                    for (Object node : path.getPath()) {
+                        DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
+                        filePathBuilder.append(treeNode.getUserObject());
+                        filePathBuilder.append(File.separator);
+                    }
+                    String filePath = filePathBuilder.toString().trim();
+                    // Leer el contenido del archivo seleccionado y establecerlo en el JTextArea
+                    try {
+                        String fileContent = new String(Files.readAllBytes(Paths.get(filePath)));
+                        ide.setText(fileContent);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        };
+    }
+
+    private DefaultMutableTreeNode createFileTree(File root) {
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(root.getName());
+        traverseAndAddNodes(root, rootNode);
+        return rootNode;
+    }
+    
+    private void traverseAndAddNodes(File folder, DefaultMutableTreeNode parentNode) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(file.getName());
+                parentNode.add(node);
+                if (file.isDirectory()) {
+                    traverseAndAddNodes(file, node);
+                }
+            }
+        }
+    }
+
 
     /**
      * @param args the command line arguments
@@ -153,16 +272,24 @@ public class Vista extends javax.swing.JFrame {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
+
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Vista.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Vista.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Vista.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Vista.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Vista.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Vista.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Vista.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Vista.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 

@@ -1,6 +1,7 @@
 package org.example.Parser;
 
 import java_cup.runtime.*;
+import org.example.clases.*;
 
 
 class Parser;
@@ -30,7 +31,7 @@ terminal SELECCIONAR, FILTRAR, INSERTAR, ACTUALIZAR, ASIGNAR, ELIMINAR, EN, VALO
          PUNTOYCOMA, DOSPUNTOS, NUMERO, PUNTO, PARENTESISA, PARENTESISC, COMILLAS;
 
 non terminal inicio, sentencia, selec, columnas, seleccion, inser, actua, actualizar, elim,  path, condiciones,
-            insercion, condicion, condicionPalabras, asignacion, condicionalNumeros;
+            insercion, condicion, condicionPalabras, asignacion, condicionalNumeros, paraActualizar, diferencia;
 
             precedence left OR;
             precedence left AND;
@@ -38,15 +39,16 @@ non terminal inicio, sentencia, selec, columnas, seleccion, inser, actua, actual
 
 start with inicio;
 
-inicio::= inicio sentencia
-   | sentencia;
+
+inicio::= inicio:inic sentencia:senten
+   | sentencia ;
 
 sentencia::=  selec {:System.out.println("Se realizo el Select");:}
             | inser {:System.out.println("Se realizo el insert");:}
             | actua {:System.out.println("Se realizo la actualizacion");:}
             | elim  {:System.out.println("Se realizo el eliminar");:};
 
-selec::= SELECCIONAR:selec columnas:colums EN path:path FILTRAR condiciones:condi PUNTOYCOMA
+selec::= SELECCIONAR columnas:colums EN path:path FILTRAR condiciones:condi PUNTOYCOMA
         |SELECCIONAR:selec columnas:colums EN path:path PUNTOYCOMA;
 
 inser::= INSERTAR:inser EN path insercion VALORES:val insercion PUNTOYCOMA:pyc;
@@ -55,8 +57,8 @@ elim::= ELIMINAR EN path:path condiciones PUNTOYCOMA;
 
 actua::= ACTUALIZAR EN path:path ASIGNAR actualizar condiciones PUNTOYCOMA;
 
-columnas::= seleccion
-        | ASTERISCO;
+columnas::= seleccion:selecColumnas
+        | ASTERISCO ;
 
 path::= PALABRA PUNTO PALABRA;
 
@@ -65,27 +67,30 @@ insercion::= PARENTESISA seleccion PARENTESISC;
 seleccion::= seleccion COMA PALABRA
         | PALABRA;
 
-condiciones::= condiciones AND condicion
-            | condiciones OR condicion
-            | condicion;
+condiciones::= condiciones:condiciones AND condicion:condi {:condiciones.addCondicional(condi);:}
+            | condiciones:condiciones OR condicion:condi {:condiciones.addCondicional(condi);:}
+            | condicion:condicion {:var condicionObjeto = new Condicion(); condicion.addConcional(condicion); RESULT = condicionObjeto; :};
 
-condicion::= condicionalNumeros
-         | condicionPalabras;
+condicion::= condicionalNumeros:cN {:RESULT= cN;:}
+         | condicionPalabras:cP {:RESULT= cP;:};
 
-actualizar::= actualizar COMA condicion
-        | condicion;
+actualizar::= actualizar COMA paraActualizar {:RESULT= pA;:}
+        | paraActualizar:pA {:RESULT= pA;:};
 
-asignacion::= PALABRA IGUAL:operador NUMERO {:RESULT= operador;:};
+paraActualizar::= asignacion {:RESULT= asignacion;:}
+              | condicionPalabras {:RESULT = condicionPalabras;:};
 
-condicionPalabras::= PALABRA IGUAL COMILLAS PALABRA COMILLAS
-                 | PALABRA IGUAL COMILLAS NUMERO COMILLAS;
+asignacion::= PALABRA:palabra IGUAL:operador NUMERO:numero {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(numero.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:};
 
-condicionalNumeros::= asignacion
-                    | PALABRA MAYORIGUALQUE:operador NUMERO {:RESULT= operador;:}
-                    | PALABRA MENORIGUALQUE:operador NUMERO {:RESULT= operador;:}
-                    | PALABRA MAYORQUE:operador NUMERO {:RESULT= operador;:}
-                    | PALABRA MENORQUE:operador NUMERO {:RESULT= operador;:}
-                    | PALABRA DIFERENTE:operador NUMERO {:RESULT= operador;:};
+condicionPalabras::= PALABRA:palabra IGUAL:operador COMILLAS PALABRA:palabra2 COMILLAS {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(palabra2.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:}
+                 | PALABRA:palabra IGUAL:operador COMILLAS NUMERO:numero COMILLAS {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(numero.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:};
 
-diferencia::= PALABRA DIFERENTE COMILLAS PALABRA COMILLAS
-            | PALABRA DIFERENTE COMILLAS NUMERO COMILLAS;
+condicionalNumeros::= asignacion {:RESULT= asignacion;:}
+                    | PALABRA:palabra MAYORIGUALQUE:operador NUMERO:numero {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(numero.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:}
+                    | PALABRA MENORIGUALQUE:operador NUMERO {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(numero.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:}
+                    | PALABRA MAYORQUE:operador NUMERO {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(numero.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:}
+                    | PALABRA MENORQUE:operador NUMERO {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(numero.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:}
+                    | PALABRA DIFERENTE:operador NUMERO {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(numero.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:};
+
+diferencia::= PALABRA:palabra DIFERENTE:operador COMILLAS PALABRA:palabra2 COMILLAS {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(palabra2.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:}
+            | PALABRA:palabra DIFERENTE:operador COMILLAS NUMERO:numero COMILLAS {:var condicional = new Condicional().builder().columna(palabra.toString()).operador(operador.toString()).valor(numero.toString()).buil(); condicional.addCondicional(condicional); RESULT = condicional;:};
